@@ -9,8 +9,13 @@ let logAcciones = [];
 let tempLicencias = [];
 let tempFechasNoDisp = [];
 
+// Instancia del modal
+let sysModalInstance;
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+    sysModalInstance = new bootstrap.Modal(document.getElementById('sysModal'));
+
     cargarDatosLocales();
     renderizarTablaPersonal();
     renderizarFeriados();
@@ -23,7 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnAgregarLicencia').addEventListener('click', agregarLicenciaTemp);
     document.getElementById('btnAgregarFechaNoDisp').addEventListener('click', agregarFechaNoDispTemp);
 
-    document.getElementById('buscarPersonal').addEventListener('input', filtrarTablaPersonal);
+    const buscarPersonalInput = document.getElementById('buscarPersonal');
+    buscarPersonalInput.addEventListener('input', filtrarTablaPersonal);
+
+    // Evitar que el click en la barra de búsqueda colapse el acordeón
+    ['click', 'mousedown', 'touchstart'].forEach(evt => {
+        buscarPersonalInput.addEventListener(evt, (e) => {
+            e.stopPropagation();
+        });
+    });
 
     // Importar/Exportar
     document.getElementById('btnExportarJSON').addEventListener('click', exportarJSON);
@@ -44,9 +57,42 @@ function registrarAccion(mensaje) {
     localStorage.setItem('guardias_log', JSON.stringify(logAcciones));
 }
 
+// === MODALS ===
+function showSysAlert(message) {
+    document.getElementById('sysModalLabel').textContent = "Mensaje del Sistema";
+    document.getElementById('sysModalBody').innerHTML = `<p>${message}</p>`;
+    document.getElementById('sysModalFooter').innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>`;
+    sysModalInstance.show();
+}
+
+function showSysConfirm(message, confirmCallback) {
+    document.getElementById('sysModalLabel').textContent = "Confirmación";
+    document.getElementById('sysModalBody').innerHTML = `<p>${message}</p>`;
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = "btn btn-primary";
+    confirmBtn.textContent = "Confirmar";
+    confirmBtn.onclick = () => {
+        sysModalInstance.hide();
+        confirmCallback();
+    };
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = "btn btn-secondary";
+    cancelBtn.textContent = "Cancelar";
+    cancelBtn.setAttribute('data-bs-dismiss', 'modal');
+
+    const footer = document.getElementById('sysModalFooter');
+    footer.innerHTML = '';
+    footer.appendChild(cancelBtn);
+    footer.appendChild(confirmBtn);
+
+    sysModalInstance.show();
+}
+
 function descargarLog() {
     if (logAcciones.length === 0) {
-        alert("El registro de acciones está vacío.");
+        showSysAlert("El registro de acciones está vacío.");
         return;
     }
     const contenido = logAcciones.join('\n');
@@ -182,7 +228,7 @@ function editarPersonal(id) {
 }
 
 function eliminarPersonal(id) {
-    if(confirm('¿Está seguro de eliminar este registro?')) {
+    showSysConfirm('¿Está seguro de eliminar este registro?', () => {
         const pEliminado = personal.find(p => p.id === id);
         personal = personal.filter(p => p.id !== id);
         if (pEliminado) {
@@ -190,7 +236,7 @@ function eliminarPersonal(id) {
         }
         guardarDatosLocales();
         renderizarTablaPersonal();
-    }
+    });
 }
 
 function cancelarEdicion() {
@@ -392,7 +438,7 @@ function generarGuardias() {
     const finInput = document.getElementById('fechaFinGuardias').value;
 
     if (!inicioInput || !finInput) {
-        alert("Por favor, seleccione un rango de fechas válido.");
+        showSysAlert("Por favor, seleccione un rango de fechas válido.");
         return;
     }
 
@@ -400,7 +446,7 @@ function generarGuardias() {
     const fechaFinal = new Date(finInput + 'T00:00:00');
 
     if (fechaActual > fechaFinal) {
-        alert("La fecha de inicio no puede ser posterior a la fecha final.");
+        showSysAlert("La fecha de inicio no puede ser posterior a la fecha final.");
         return;
     }
 
@@ -699,7 +745,7 @@ function exportarExcel() {
 function importarDatos() {
     const fileInput = document.getElementById('importarArchivo');
     if (!fileInput.files.length) {
-        alert("Por favor seleccione un archivo.");
+        showSysAlert("Por favor seleccione un archivo.");
         return;
     }
 
@@ -717,9 +763,9 @@ function importarDatos() {
                 guardarDatosLocales();
                 renderizarTablaPersonal();
                 renderizarFeriados();
-                alert("Datos importados desde JSON correctamente.");
+                showSysAlert("Datos importados desde JSON correctamente.");
             } catch (error) {
-                alert("Error al leer el archivo JSON.");
+                showSysAlert("Error al leer el archivo JSON.");
             }
         } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
             try {
@@ -742,12 +788,12 @@ function importarDatos() {
 
                 guardarDatosLocales();
                 renderizarTablaPersonal();
-                alert("Datos importados desde Excel correctamente.");
+                showSysAlert("Datos importados desde Excel correctamente.");
             } catch (error) {
-                alert("Error al leer el archivo Excel.");
+                showSysAlert("Error al leer el archivo Excel.");
             }
         } else {
-            alert("Formato de archivo no soportado.");
+            showSysAlert("Formato de archivo no soportado.");
         }
     };
 

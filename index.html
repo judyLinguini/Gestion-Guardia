@@ -127,7 +127,7 @@
                 <div class="card mt-4 mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapsePersonalList" aria-expanded="true">
                         <span>Lista de Personal (Click para colapsar/expandir)</span>
-                        <input type="text" id="buscarPersonal" class="form-control form-control-sm w-25" placeholder="Buscar personal..." onclick="event.stopPropagation()">
+                        <input type="text" id="buscarPersonal" class="form-control form-control-sm w-25" placeholder="Buscar personal...">
                     </div>
                     <div id="collapsePersonalList" class="collapse show">
                     <div class="card-body">
@@ -140,8 +140,6 @@
                                         <th>Exento</th>
                                         <th>Licencia</th>
                                         <th>Días Restringidos</th>
-                                        <th>G. Hábiles</th>
-                                        <th>G. Finde</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -251,6 +249,24 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Modal for Alerts and Confirms -->
+    <div class="modal fade" id="sysModal" tabindex="-1" aria-labelledby="sysModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sysModalLabel">Mensaje del Sistema</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="sysModalBody">
+                    ...
+                </div>
+                <div class="modal-footer" id="sysModalFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
