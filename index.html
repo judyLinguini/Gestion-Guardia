@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Guardias</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Gestión de Guardias</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true">Personal</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="guardias-tab" data-bs-toggle="tab" data-bs-target="#guardias" type="button" role="tab" aria-controls="guardias" aria-selected="false">Generación de Guardias</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="import-export-tab" data-bs-toggle="tab" data-bs-target="#import-export" type="button" role="tab" aria-controls="import-export" aria-selected="false">Importar/Exportar</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña Personal -->
+            <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Agregar/Editar Personal
+                    </div>
+                    <div class="card-body">
+                        <form id="personalForm">
+                            <input type="hidden" id="userId">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="grado" class="form-label">Grado Militar</label>
+                                    <input type="text" class="form-control" id="grado" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="nombre" class="form-label">Nombre y Apellido</label>
+                                    <input type="text" class="form-control" id="nombre" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="exentoGuardia">
+                                        <label class="form-check-label" for="exentoGuardia">
+                                            Exento de Guardia
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="licenciaInicio" class="form-label">Licencia Desde</label>
+                                    <input type="date" class="form-control" id="licenciaInicio">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="licenciaFin" class="form-label">Licencia Hasta</label>
+                                    <input type="date" class="form-control" id="licenciaFin">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Días No Disponibles (Ej: No miércoles)</label>
+                                    <div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noLun" value="1">
+                                            <label class="form-check-label" for="noLun">Lun</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noMar" value="2">
+                                            <label class="form-check-label" for="noMar">Mar</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noMie" value="3">
+                                            <label class="form-check-label" for="noMie">Mié</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noJue" value="4">
+                                            <label class="form-check-label" for="noJue">Jue</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noVie" value="5">
+                                            <label class="form-check-label" for="noVie">Vie</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noSab" value="6">
+                                            <label class="form-check-label" for="noSab">Sáb</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input dia-no-disponible" type="checkbox" id="noDom" value="0">
+                                            <label class="form-check-label" for="noDom">Dom</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="guardiasHabiles" class="form-label">Guardias Hábiles</label>
+                                    <input type="number" class="form-control" id="guardiasHabiles" value="0" min="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="guardiasFinde" class="form-label">Guardias Finde/Feriados</label>
+                                    <input type="number" class="form-control" id="guardiasFinde" value="0" min="0">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btnGuardarPersonal">Guardar Personal</button>
+                            <button type="button" class="btn btn-secondary" id="btnCancelarEdicion" style="display:none;">Cancelar Edición</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4 mb-4">
+                    <div class="card-header">
+                        Lista de Personal
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="tablaPersonal">
+                                <thead>
+                                    <tr>
+                                        <th>Grado</th>
+                                        <th>Nombre</th>
+                                        <th>Exento</th>
+                                        <th>Licencia</th>
+                                        <th>Días Restringidos</th>
+                                        <th>G. Hábiles</th>
+                                        <th>G. Finde</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Contenido dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña Guardias -->
+            <div class="tab-pane fade" id="guardias" role="tabpanel" aria-labelledby="guardias-tab">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Configurar Guardias
+                    </div>
+                    <div class="card-body">
+                        <form id="guardiasForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                                    <input type="date" class="form-control" id="fechaInicioGuardias" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fechaFin" class="form-label">Fecha Fin</label>
+                                    <input type="date" class="form-control" id="fechaFinGuardias" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Feriados Adicionales (Selecciona fechas)</label>
+                                <div class="input-group mb-3">
+                                    <input type="date" class="form-control" id="nuevoFeriado">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnAgregarFeriado">Agregar Feriado</button>
+                                </div>
+                                <ul class="list-group" id="listaFeriados">
+                                    <!-- Feriados dinámicos -->
+                                </ul>
+                            </div>
+                            <button type="button" class="btn btn-success" id="btnGenerarGuardias">Generar Lista de Guardias</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4 mb-4" id="resultadosGuardia" style="display:none;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Lista de Guardias Generada</span>
+                        <button class="btn btn-sm btn-primary" id="btnExportarGuardiasExcel">Exportar a Excel</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped" id="tablaGuardiasGeneradas">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Día de la Semana</th>
+                                        <th>Tipo de Día</th>
+                                        <th>Personal Asignado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Contenido dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña Importar/Exportar -->
+            <div class="tab-pane fade" id="import-export" role="tabpanel" aria-labelledby="import-export-tab">
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">Exportar Datos</div>
+                            <div class="card-body">
+                                <p>Guarda todos los datos del personal (incluyendo contadores) en un archivo para respaldarlos.</p>
+                                <button class="btn btn-primary mb-2" id="btnExportarJSON">Descargar Respaldo JSON</button>
+                                <button class="btn btn-success mb-2" id="btnExportarExcel">Exportar Personal a Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">Importar Datos</div>
+                            <div class="card-body">
+                                <p>Restaura datos desde un archivo JSON previamente guardado, o importa desde Excel.</p>
+                                <div class="mb-3">
+                                    <label for="importarArchivo" class="form-label">Seleccionar Archivo (JSON o Excel)</label>
+                                    <input class="form-control" type="file" id="importarArchivo" accept=".json,.xlsx,.xls">
+                                </div>
+                                <button class="btn btn-warning" id="btnImportarDatos">Importar Datos</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/FileSaver.min.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
