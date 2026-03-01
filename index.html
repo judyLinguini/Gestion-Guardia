@@ -30,16 +30,23 @@
             <!-- Pestaña Personal -->
             <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                 <div class="card mt-3">
-                    <div class="card-header">
-                        Agregar/Editar Personal
+                    <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapsePersonalForm" aria-expanded="true">
+                        Agregar/Editar Personal (Click para colapsar/expandir)
                     </div>
+                    <div id="collapsePersonalForm" class="collapse show">
                     <div class="card-body">
                         <form id="personalForm">
                             <input type="hidden" id="userId">
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <label for="grado" class="form-label">Grado Militar</label>
-                                    <input type="text" class="form-control" id="grado" required>
+                                    <select class="form-select" id="grado" required>
+                                        <option value="Sdo.">Sdo.</option>
+                                        <option value="Cabo 2ª">Cabo 2ª</option>
+                                        <option value="Cabo 1ª">Cabo 1ª</option>
+                                        <option value="Sgto. 2ª">Sgto. 2ª</option>
+                                        <option value="Sgto. 1ª">Sgto. 1ª</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-8">
                                     <label for="nombre" class="form-label">Nombre y Apellido</label>
@@ -55,13 +62,16 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="licenciaInicio" class="form-label">Licencia Desde</label>
-                                    <input type="date" class="form-control" id="licenciaInicio">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="licenciaFin" class="form-label">Licencia Hasta</label>
-                                    <input type="date" class="form-control" id="licenciaFin">
+                                <div class="col-md-9">
+                                    <label class="form-label">Periodos de Licencia (fraccionados)</label>
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text">Desde</span>
+                                        <input type="date" class="form-control" id="licenciaInicioTemp">
+                                        <span class="input-group-text">Hasta</span>
+                                        <input type="date" class="form-control" id="licenciaFinTemp">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnAgregarLicencia">Agregar</button>
+                                    </div>
+                                    <ul class="list-group mb-2" id="listaLicenciasTemp"></ul>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -98,25 +108,27 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label for="guardiasHabiles" class="form-label">Guardias Hábiles</label>
-                                    <input type="number" class="form-control" id="guardiasHabiles" value="0" min="0">
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="guardiasFinde" class="form-label">Guardias Finde/Feriados</label>
-                                    <input type="number" class="form-control" id="guardiasFinde" value="0" min="0">
+                                <div class="col-md-6">
+                                    <label class="form-label">Fechas Específicas No Disponibles</label>
+                                    <div class="input-group mb-2">
+                                        <input type="date" class="form-control" id="fechaNoDisponibleTemp">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnAgregarFechaNoDisp">Agregar</button>
+                                    </div>
+                                    <ul class="list-group mb-2" id="listaFechasNoDispTemp"></ul>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary" id="btnGuardarPersonal">Guardar Personal</button>
                             <button type="button" class="btn btn-secondary" id="btnCancelarEdicion" style="display:none;">Cancelar Edición</button>
                         </form>
                     </div>
+                    </div>
                 </div>
 
                 <div class="card mt-4 mb-4">
-                    <div class="card-header">
-                        Lista de Personal
+                    <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapsePersonalList" aria-expanded="true">
+                        Lista de Personal (Click para colapsar/expandir)
                     </div>
+                    <div id="collapsePersonalList" class="collapse show">
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover" id="tablaPersonal">
@@ -138,15 +150,17 @@
                             </table>
                         </div>
                     </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Pestaña Guardias -->
             <div class="tab-pane fade" id="guardias" role="tabpanel" aria-labelledby="guardias-tab">
                 <div class="card mt-3">
-                    <div class="card-header">
-                        Configurar Guardias
+                    <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseGuardiasForm" aria-expanded="true">
+                        Configurar Guardias (Click para colapsar/expandir)
                     </div>
+                    <div id="collapseGuardiasForm" class="collapse show">
                     <div class="card-body">
                         <form id="guardiasForm">
                             <div class="row mb-3">
@@ -172,13 +186,15 @@
                             <button type="button" class="btn btn-success" id="btnGenerarGuardias">Generar Lista de Guardias</button>
                         </form>
                     </div>
+                    </div>
                 </div>
 
                 <div class="card mt-4 mb-4" id="resultadosGuardia" style="display:none;">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Lista de Guardias Generada</span>
-                        <button class="btn btn-sm btn-primary" id="btnExportarGuardiasExcel">Exportar a Excel</button>
+                    <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseGuardiasList" aria-expanded="true">
+                        <span>Lista de Guardias Generada (Click para colapsar/expandir)</span>
+                        <button class="btn btn-sm btn-primary" id="btnExportarGuardiasExcel" onclick="event.stopPropagation()">Exportar a Excel</button>
                     </div>
+                    <div id="collapseGuardiasList" class="collapse show">
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="tablaGuardiasGeneradas">
@@ -188,6 +204,7 @@
                                         <th>Día de la Semana</th>
                                         <th>Tipo de Día</th>
                                         <th>Personal Asignado</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -195,6 +212,7 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -204,17 +222,23 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="card mb-4">
-                            <div class="card-header">Exportar Datos</div>
+                            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseExport" aria-expanded="true">Exportar Datos (Click)</div>
+                            <div id="collapseExport" class="collapse show">
                             <div class="card-body">
                                 <p>Guarda todos los datos del personal (incluyendo contadores) en un archivo para respaldarlos.</p>
                                 <button class="btn btn-primary mb-2" id="btnExportarJSON">Descargar Respaldo JSON</button>
                                 <button class="btn btn-success mb-2" id="btnExportarExcel">Exportar Personal a Excel</button>
+                                <hr>
+                                <p>Descarga un registro histórico de todas las acciones del sistema.</p>
+                                <button class="btn btn-info mb-2" id="btnDescargarLog">Descargar Registro de Acciones (TXT)</button>
+                            </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="card mb-4">
-                            <div class="card-header">Importar Datos</div>
+                            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseImport" aria-expanded="true">Importar Datos (Click)</div>
+                            <div id="collapseImport" class="collapse show">
                             <div class="card-body">
                                 <p>Restaura datos desde un archivo JSON previamente guardado, o importa desde Excel.</p>
                                 <div class="mb-3">
@@ -222,6 +246,7 @@
                                     <input class="form-control" type="file" id="importarArchivo" accept=".json,.xlsx,.xls">
                                 </div>
                                 <button class="btn btn-warning" id="btnImportarDatos">Importar Datos</button>
+                            </div>
                             </div>
                         </div>
                     </div>
