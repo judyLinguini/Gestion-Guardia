@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Gestión de Guardias</a>
         </div>
@@ -125,8 +125,9 @@
                 </div>
 
                 <div class="card mt-4 mb-4">
-                    <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapsePersonalList" aria-expanded="true">
-                        Lista de Personal (Click para colapsar/expandir)
+                    <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapsePersonalList" aria-expanded="true">
+                        <span>Lista de Personal (Click para colapsar/expandir)</span>
+                        <input type="text" id="buscarPersonal" class="form-control form-control-sm w-25" placeholder="Buscar personal..." onclick="event.stopPropagation()">
                     </div>
                     <div id="collapsePersonalList" class="collapse show">
                     <div class="card-body">

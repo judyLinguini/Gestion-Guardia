@@ -19,26 +19,86 @@ function generarGuardiasLogic(fechaInicio, fechaFin, personal, feriados) {
 
         let candidatos = personalDisponible.filter(p => {
             if (p.exentoGuardia) return false;
+
+            // Verificación simplificada de licencia
             if (p.licenciaInicio && p.licenciaFin && dateString >= p.licenciaInicio && dateString <= p.licenciaFin) return false;
-            if (p.diasNoDisponibles.includes(diaSemana)) return false;
+            if (p.licencias && p.licencias.length > 0) {
+                let enLicencia = p.licencias.some(lic => dateString >= lic.inicio && dateString <= lic.fin);
+                if (enLicencia) return false;
+            }
+
+            // Verificación simplificada de dias no disponibles
+            if (p.diasNoDisponibles && p.diasNoDisponibles.includes(diaSemana)) return false;
+            if (p.fechasNoDisponibles && p.fechasNoDisponibles.includes(dateString)) return false;
+
+            // Evitar dos días consecutivos de guardia
+            if (p.ultimaGuardia) {
+                let fechaUltima = new Date(p.ultimaGuardia + 'T00:00:00');
+                let diffTime = Math.abs(fechaActual - fechaUltima);
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 1) {
+                    return false;
+                }
+            }
+
             return true;
         });
 
-        if (candidatos.length > 0) {
-            if (esDiaEspecial) {
-                candidatos.sort((a, b) => a.guardiasFinde - b.guardiasFinde);
-            } else {
-                candidatos.sort((a, b) => a.guardiasHabiles - b.guardiasHabiles);
+        // Ordenar candidatos
+        candidatos.sort((a, b) => {
+            // 1. Menos guardias totales
+            let totalA = (a.totalGuardias || 0);
+            let totalB = (b.totalGuardias || 0);
+            if (totalA !== totalB) {
+                return totalA - totalB;
             }
 
-            const elegido = candidatos[0];
-            guardiasGeneradas.push({ fecha: dateString, asignado: elegido.nombre, tipo: esDiaEspecial ? 'Finde' : 'Habil' });
+            // 2. Más tiempo desde la última guardia
+            if (!a.ultimaGuardia && b.ultimaGuardia) return -1;
+            if (a.ultimaGuardia && !b.ultimaGuardia) return 1;
+            if (a.ultimaGuardia && b.ultimaGuardia) {
+                let fechaA = new Date(a.ultimaGuardia);
+                let fechaB = new Date(b.ultimaGuardia);
+                if (fechaA.getTime() !== fechaB.getTime()) {
+                    return fechaA.getTime() - fechaB.getTime();
+                }
+            }
 
-            if (esDiaEspecial) elegido.guardiasFinde++;
-            else elegido.guardiasHabiles++;
-        } else {
-            guardiasGeneradas.push({ fecha: dateString, asignado: null, tipo: esDiaEspecial ? 'Finde' : 'Habil' });
+            return 0;
+        });
+
+        let elegidos = [];
+        let nombresElegidos = [];
+        let idsElegidos = [];
+
+        for (let i = 0; i < 2; i++) {
+            if (candidatos.length > i) {
+                const elegido = candidatos[i];
+                elegidos.push(elegido);
+                nombresElegidos.push(elegido.nombre);
+                idsElegidos.push(elegido.id);
+
+                elegido.totalGuardias = (elegido.totalGuardias || 0) + 1;
+                elegido.ultimaGuardia = dateString;
+            }
         }
+
+        if (elegidos.length > 0) {
+            guardiasGeneradas.push({
+                fecha: dateString,
+                asignado: nombresElegidos.join(' y '),
+                idAsignado: idsElegidos,
+                tipo: esDiaEspecial ? 'Finde/Feriado' : 'Hábil'
+            });
+        } else {
+            guardiasGeneradas.push({
+                fecha: dateString,
+                asignado: "NADIE DISPONIBLE",
+                idAsignado: null,
+                tipo: esDiaEspecial ? 'Finde/Feriado' : 'Hábil'
+            });
+        }
+
         fechaActual.setDate(fechaActual.getDate() + 1);
     }
     return { guardiasGeneradas, personalActualizado: personalDisponible };
@@ -46,10 +106,12 @@ function generarGuardiasLogic(fechaInicio, fechaFin, personal, feriados) {
 
 // Datos de prueba
 const personalPrueba = [
-    { id: 1, grado: 'Sgt', nombre: 'Juan Perez', exentoGuardia: false, licenciaInicio: '', licenciaFin: '', diasNoDisponibles: [], guardiasHabiles: 0, guardiasFinde: 0 },
-    { id: 2, grado: 'Cbo', nombre: 'Maria Gomez', exentoGuardia: false, licenciaInicio: '', licenciaFin: '', diasNoDisponibles: [3], guardiasHabiles: 0, guardiasFinde: 0 }, // No puede miércoles
-    { id: 3, grado: 'Sold', nombre: 'Carlos Ruiz', exentoGuardia: false, licenciaInicio: '2023-10-02', licenciaFin: '2023-10-04', diasNoDisponibles: [], guardiasHabiles: 0, guardiasFinde: 0 }, // Licencia
-    { id: 4, grado: 'Subof', nombre: 'Ana Dias', exentoGuardia: true, licenciaInicio: '', licenciaFin: '', diasNoDisponibles: [], guardiasHabiles: 0, guardiasFinde: 0 } // Exenta
+    { id: 1, grado: 'Sgto. 1ª', nombre: 'Juan Perez', exentoGuardia: false, licencias: [], diasNoDisponibles: [], totalGuardias: 0, ultimaGuardia: null },
+    { id: 2, grado: 'Cabo 1ª', nombre: 'Maria Gomez', exentoGuardia: false, licencias: [], diasNoDisponibles: [3], totalGuardias: 0, ultimaGuardia: null }, // No puede miércoles
+    { id: 3, grado: 'Sdo.', nombre: 'Carlos Ruiz', exentoGuardia: false, licencias: [{inicio: '2023-10-02', fin: '2023-10-04'}], diasNoDisponibles: [], totalGuardias: 0, ultimaGuardia: null }, // Licencia
+    { id: 4, grado: 'Sgto. 2ª', nombre: 'Ana Dias', exentoGuardia: true, licencias: [], diasNoDisponibles: [], totalGuardias: 0, ultimaGuardia: null }, // Exenta
+    { id: 5, grado: 'Sdo.', nombre: 'Pedro Lopez', exentoGuardia: false, licencias: [], diasNoDisponibles: [], totalGuardias: 0, ultimaGuardia: null },
+    { id: 6, grado: 'Sdo.', nombre: 'Diego Martinez', exentoGuardia: false, licencias: [], diasNoDisponibles: [], totalGuardias: 0, ultimaGuardia: null }
 ];
 
 const feriadosPrueba = ['2023-10-06'];
@@ -63,25 +125,23 @@ guardiasGeneradas.forEach(g => console.log(`${g.fecha} (${g.tipo}) -> ${g.asigna
 // Validaciones
 assert.strictEqual(guardiasGeneradas.length, 7, "Debería generar 7 guardias");
 
-// 2023-10-01 (Domingo - Finde) - Carlos no en licencia, Maria disponible, Juan disponible
-// Ana exenta. Todos guardiasFinde=0
-// Se asigna al primero de los 3 (Juan Perez)
-
-// 2023-10-02 (Lunes - Habil) - Carlos en licencia. Se asigna a Maria o Juan.
-
 // Comprobar que nadie exento fue asignado
-const anaAsignada = guardiasGeneradas.some(g => g.asignado === 'Ana Dias');
+const anaAsignada = guardiasGeneradas.some(g => g.asignado.includes('Ana Dias'));
 assert.strictEqual(anaAsignada, false, "Ana está exenta, no debería tener guardias");
 
 // Comprobar que Maria no fue asignada un miércoles (2023-10-04)
 const guardiaMiercoles = guardiasGeneradas.find(g => g.fecha === '2023-10-04');
-assert.notStrictEqual(guardiaMiercoles.asignado, 'Maria Gomez', "Maria no puede hacer guardia los miércoles");
+assert.ok(!guardiaMiercoles.asignado.includes('Maria Gomez'), "Maria no puede hacer guardia los miércoles");
 
-// Comprobar la equidad (Todos deberían tener contadores actualizados)
+// Comprobar la equidad
 const juan = personalActualizado.find(p => p.nombre === 'Juan Perez');
 const maria = personalActualizado.find(p => p.nombre === 'Maria Gomez');
 
-assert.ok(juan.guardiasHabiles > 0 || juan.guardiasFinde > 0, "Juan debería tener guardias");
-assert.ok(maria.guardiasHabiles > 0 || maria.guardiasFinde > 0, "Maria debería tener guardias");
+assert.ok(juan.totalGuardias > 0, "Juan debería tener guardias");
+assert.ok(maria.totalGuardias > 0, "Maria debería tener guardias");
+
+// Validar que se asignaron 2 personas donde fue posible
+const guardiaDomingo = guardiasGeneradas.find(g => g.fecha === '2023-10-01');
+assert.ok(guardiaDomingo.asignado.includes(' y '), "Deberían haber 2 personas asignadas en domingo (separadas por ' y ')");
 
 console.log("Todas las pruebas pasaron correctamente.");

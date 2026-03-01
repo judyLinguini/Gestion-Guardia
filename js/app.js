@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnAgregarLicencia').addEventListener('click', agregarLicenciaTemp);
     document.getElementById('btnAgregarFechaNoDisp').addEventListener('click', agregarFechaNoDispTemp);
 
+    document.getElementById('buscarPersonal').addEventListener('input', filtrarTablaPersonal);
+
     // Importar/Exportar
     document.getElementById('btnExportarJSON').addEventListener('click', exportarJSON);
     document.getElementById('btnExportarExcel').addEventListener('click', exportarExcel);
@@ -211,6 +213,20 @@ const pesoGrados = {
 };
 
 let filaArrastrada = null;
+
+function filtrarTablaPersonal(e) {
+    const texto = e.target.value.toLowerCase();
+    const filas = document.querySelectorAll('#tablaPersonal tbody tr');
+
+    filas.forEach(fila => {
+        const contenido = fila.textContent.toLowerCase();
+        if (contenido.includes(texto)) {
+            fila.style.display = '';
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+}
 
 function renderizarTablaPersonal() {
     const tbody = document.querySelector('#tablaPersonal tbody');
@@ -420,6 +436,16 @@ function generarGuardias() {
             // Check día no disponible
             if (p.diasNoDisponibles && p.diasNoDisponibles.includes(diaSemana)) return false;
             if (p.fechasNoDisponibles && p.fechasNoDisponibles.includes(dateString)) return false;
+
+            // Evitar dos días consecutivos de guardia
+            if (p.ultimaGuardia) {
+                let fechaUltima = new Date(p.ultimaGuardia + 'T00:00:00');
+                let diffTime = Math.abs(fechaActual - fechaUltima);
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 1) {
+                    return false;
+                }
+            }
 
             return true;
         });
