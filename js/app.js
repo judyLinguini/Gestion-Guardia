@@ -486,11 +486,14 @@ function generarGuardias() {
             // Evitar dos días consecutivos de guardia
             if (p.ultimaGuardia) {
                 let fechaUltima = new Date(p.ultimaGuardia + 'T00:00:00');
+                p._tsUltimaGuardia = fechaUltima.getTime();
                 let diffTime = Math.abs(fechaActual - fechaUltima);
                 let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 if (diffDays <= 1) {
                     return false;
                 }
+            } else {
+                p._tsUltimaGuardia = null;
             }
 
             return true;
@@ -509,10 +512,8 @@ function generarGuardias() {
             if (!a.ultimaGuardia && b.ultimaGuardia) return -1;
             if (a.ultimaGuardia && !b.ultimaGuardia) return 1;
             if (a.ultimaGuardia && b.ultimaGuardia) {
-                let fechaA = new Date(a.ultimaGuardia);
-                let fechaB = new Date(b.ultimaGuardia);
-                if (fechaA.getTime() !== fechaB.getTime()) {
-                    return fechaA.getTime() - fechaB.getTime();
+                if (a._tsUltimaGuardia !== b._tsUltimaGuardia) {
+                    return a._tsUltimaGuardia - b._tsUltimaGuardia;
                 }
             }
 
